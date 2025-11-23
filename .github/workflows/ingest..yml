@@ -38,7 +38,7 @@ jobs:
 
       - name: Run ingestion
         env:
-          SUPABASE_SERVICE_URL: ${{ secrets.SUPABASE_SERVICE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_SERVICE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           python fintracker.py addAll --max-results 200
