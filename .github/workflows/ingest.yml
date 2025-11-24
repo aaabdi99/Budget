@@ -36,9 +36,18 @@ jobs:
             python-dateutil==2.9.0.post0 \
             supabase==2.4.5
 
-      - name: Run ingestion
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: |
-          python fintracker.py addAll --max-results 200
+  - name: Run ingestion
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    run: |
+      python fintracker.py addAll --max-results 200
+
+  - name: Record last ingestion timestamp
+    if: success()
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    run: |
+      python scripts/record_ingestion.py
+
