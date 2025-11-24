@@ -36,18 +36,29 @@ jobs:
             python-dateutil==2.9.0.post0 \
             supabase==2.4.5
 
-  - name: Run ingestion
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-    run: |
-      python fintracker.py addAll --max-results 200
+      - name: Run ingestion
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python fintracker.py addAll --max-results 200
 
-  - name: Record last ingestion timestamp
-    if: success()
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-    run: |
-      python scripts/record_ingestion.py
+      - name: Record last ingestion timestamp
+        if: success()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python - <<'PY'
+from datetime import datetime, timezone
+import os
+from supabase import create_client
 
+supabase_url = os.environ["SUPABASE_URL"]
+supabase_key = os.environ["SUPABASE_SERVICE_KEY"]
+client = create_client(supabase_url, supabase_key)
+now = datetime.now(timezone.utc).isoformat()
+payload = {"id": 1, "last_run": now}
+client.table("ingestion_status").upsert(payload).execute()
+print("Recorded ingestion timestamp:", now)
+PY
