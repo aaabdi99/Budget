@@ -50,15 +50,15 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           python - <<'PY'
-from datetime import datetime, timezone
-import os
-from supabase import create_client
+          from datetime import datetime, timezone
+          import os
+          from supabase import create_client
 
-supabase_url = os.environ["SUPABASE_URL"]
-supabase_key = os.environ["SUPABASE_SERVICE_KEY"]
-client = create_client(supabase_url, supabase_key)
-now = datetime.now(timezone.utc).isoformat()
-payload = {"id": 1, "last_run": now}
-client.table("ingestion_status").upsert(payload).execute()
-print("Recorded ingestion timestamp:", now)
-PY
+          supabase_url = os.environ["SUPABASE_URL"]
+          supabase_key = os.environ["SUPABASE_SERVICE_KEY"]
+          client = create_client(supabase_url, supabase_key)
+          now = datetime.now(timezone.utc).isoformat()
+          payload = {"id": 1, "last_run": now}
+          client.table("ingestion_status").upsert(payload).execute()
+          print("Recorded ingestion timestamp:", now)
+          PY
