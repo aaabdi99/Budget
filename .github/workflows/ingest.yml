@@ -50,15 +50,25 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           python - <<'PY'
-          from datetime import datetime, timezone
+          from datetime import datetime
           import os
+          from zoneinfo import ZoneInfo
           from supabase import create_client
+
+          def format_est(dt: datetime) -> str:
+              milliseconds = dt.microsecond // 1000
+              date_part = dt.strftime("%Y-%m-%d %I:%M:%S")
+              am_pm = dt.strftime("%p")
+              return f"{date_part}.{milliseconds:03d} {am_pm} EST"
 
           supabase_url = os.environ["SUPABASE_URL"]
           supabase_key = os.environ["SUPABASE_SERVICE_KEY"]
           client = create_client(supabase_url, supabase_key)
-          now = datetime.now(timezone.utc).isoformat()
-          payload = {"id": 1, "last_run": now}
+
+          now_est = datetime.now(ZoneInfo("America/New_York"))
+          formatted = format_est(now_est)
+
+          payload = {"id": 1, "last_run": formatted}
           client.table("ingestion_status").upsert(payload).execute()
-          print("Recorded ingestion timestamp:", now)
+          print("Recorded ingestion timestamp:", formatted)
           PY
